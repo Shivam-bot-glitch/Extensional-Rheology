@@ -76,7 +76,7 @@ try
 		thisFrame = read(videoObject, frame);
 		
 		% Display it
-		hImage = subplot(2, 2, 1);
+		hImage = subplot(2, 3, 1);
 		image(thisFrame);
 		caption = sprintf('Frame %4d of %d.', frame, numberOfFrames);
 		title(caption, 'FontSize', fontSize);
@@ -119,7 +119,7 @@ try
 
 		
 		% Plot the diameter vs frame.
-		hPlot = subplot(2, 2, 2);
+		hPlot = subplot(2, 3, 2);
 		hold off;
 		plot(Diameter, 'k-', 'LineWidth', 2);
 		hold on;
@@ -156,13 +156,16 @@ try
 			Background = (1-alpha)* thisFrame + alpha * Background;
 		end
 		% Display the changing/adapting background.
-		subplot(2, 2, 3);
+		subplot(2, 3, 3);
 		imshow(Background);
 		title('Adaptive Background', 'FontSize', fontSize);
 		% Plot the edge image.
-		subplot(2, 2, 4);
+		subplot(2, 3, 4);
 		imshow(EdgeFrame);
 		title('Edge Frame Image', 'FontSize', fontSize);
+		subplot(2, 3, 5);
+		imshow(Graycrop);
+		title('Crop Frame Image', 'FontSize', fontSize);
 	end
 	
 	% Alert user that we're done.
