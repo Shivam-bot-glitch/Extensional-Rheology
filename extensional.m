@@ -112,8 +112,8 @@ try
             t(1,i)=r(1);
             t(2,i)=r(L);
         end
-        upper_edge = max(tohi(1,:));% Distance of upper edge
-        lower_edge = min(tohi(2,:));% Distance of lower edge
+        upper_edge = max(t(1,:));% Distance of upper edge
+        lower_edge = min(t(2,:));% Distance of lower edge
 
         Diameter(frame) = abs(upper_edge - lower_edge); % Calculate the absolute value of diameter of filament
 
