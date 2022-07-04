@@ -15,7 +15,7 @@ fontSize = 15;
 % Open the sample.avi in MATLAB.
 % First get the folder that it lives in.
 folder = fileparts('C:\Users\Asus\Downloads\'); % Determine where folder the is.
-movieFullFileName = fullfile(folder, 'sample.avi');
+movieFullFileName = fullfile(folder, 'sample1.avi');
 % Check to see that it exists.
 if ~exist(movieFullFileName, 'file')
 	strErrorMessage = sprintf('File not found:\n%s\nYou can choose a new one, or cancel', movieFullFileName);
@@ -36,6 +36,7 @@ try
 	videoObject = VideoReader(movieFullFileName)
 	% Determine how many frames there are.
 	numberOfFrames = videoObject.NumberOfFrames;
+
 	vidHeight = videoObject.Height;
 	vidWidth = videoObject.Width;
 	
@@ -71,7 +72,9 @@ try
 	% Loop through the movie, writing all frames out.
 	% Each frame will be in a separate file with unique name.
     Diameter = zeros(numberOfFramesWritten,1);
+    
 	for frame = 1 : numberOfFrames
+
 		% Extract the frame from the movie structure.
 		thisFrame = read(videoObject, frame);
 		
@@ -103,25 +106,35 @@ try
 		
 		% Calculate the diameter.
 		grayImage = rgb2gray(thisFrame);% Convert image from rgb to gray
-        EdgeFrame = edge(grayImage,"sobel");% Detect edges
-        Graycrop = imcrop(EdgeFrame,[60 100 150 10]); % Crop the image
-		t = zeros(2,10);% Code to be improved
-        for i=1:10
-            r = find(EdgeFrame(:,i));
-            L = length(r);
-            t(1,i)=r(1);
-            t(2,i)=r(L);
+        EdgeFrame = edge(grayImage,"Roberts");% Detect edges
+        se=ones(30,8);% Taking a rectangle structural element
+        morf = imclose(EdgeFrame,se); % Using Morphology , making image more white to connect the disconnecting lines
+        [height, width, dim] = size(morf); % To extract the height and width from the image
+        Graycrop = imcrop(morf,[width/4 (height/3) width/2 20]); % Crop the image // imcrop(I , rectangle) .rectangle is a four element position vector[xmin ymin width height]
+        % Plot the Morph image
+        subplot(2,3,6);
+        imshow(morf);
+	t = zeros(2,20);% Create an array which stores left edge and right edge in 1st and 2nd row respectively
+        for i=1:20 % Iteration of i to go through each column
+            r = find((Graycrop(i,:)));% r is a column matrix which stores the index of pixels where the value is 1. 
+            if isempty(r) % Continue the loop if r is empty i.e we get an null column matrix
+                disp(i)
+                continue % Goes to next iteration i.e next value of i
+            end
+            L = length(r);% Finding the length of the column matrix if its a non zero matrix
+            t(1,i)=r(1);% Store the index of the first time it gets white pixel, i.e left edge
+            t(2,i)=r(L);% Store the index of the last time it gest white pixel, i.e right edge
         end
-        upper_edge = max(t(1,:));% Distance of upper edge
-        lower_edge = min(t(2,:));% Distance of lower edge
+        left_edge = max(t(1,:));% Distance of left edge
+        right_edge = min(t(2,:));% Distance of lower edge
 
-        Diameter(frame) = abs(upper_edge - lower_edge); % Calculate the absolute value of diameter of filament
-
-		
+        Diameter(frame) = abs(left_edge - right_edge); % Calculate the absolute value of diameter of filament
+        Diameter(frame) = 0.5*(Diameter(frame));
+		% Diameter(frame)=Diameter(frame)*2;
 		% Plot the diameter vs frame.
 		hPlot = subplot(2, 3, 2);
 		hold off;
-		plot(Diameter, 'k-', 'LineWidth', 2);
+		plot(Diameter, 'k-', 'LineWidth', 1.5);
 		hold on;
 		grid on;
 		
@@ -162,8 +175,8 @@ try
 		% Plot the edge image.
 		subplot(2, 3, 4);
 		imshow(EdgeFrame);
-		title('Edge Frame Image', 'FontSize', fontSize);
-		subplot(2, 3, 5);
+        title('Edge Frame Image', 'FontSize', fontSize);
+        subplot(2, 3, 5);
 		imshow(Graycrop);
 		title('Crop Frame Image', 'FontSize', fontSize);
 	end
@@ -232,7 +245,7 @@ try
 	
 catch ME
 	% Some error happened if you get here.
-	strErrorMessage = sprintf('Error extracting movie frames from:\n\n%s\n\nError: %s\n\n)', movieFullFileName, ME.message);
+
+ 	strErrorMessage = sprintf('Error extracting movie frames from:\n\n%s\n\nError: %s\n\n)', movieFullFileName, ME.message);
 	uiwait(msgbox(strErrorMessage));
 end
-
