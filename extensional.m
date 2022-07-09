@@ -71,8 +71,8 @@ try
 	
 	% Loop through the movie, writing all frames out.
 	% Each frame will be in a separate file with unique name.
-    Diameter = zeros(numberOfFramesWritten,1);
-    
+   	Diameter = zeros(numberOfFramesWritten,1);
+        time = linspace(1,numberOfFrames,numberOfFrames);
 	for frame = 1 : numberOfFrames
 
 		% Extract the frame from the movie structure.
@@ -180,6 +180,22 @@ try
 		imshow(Graycrop);
 		title('Crop Frame Image', 'FontSize', fontSize);
 	end
+	
+		h=log(Diameter);
+    		figure()
+    		tiledlayout(1,2)
+    		nexttile
+    		plot(time,h,'bo')
+    		ylabel('log(Diameter)')
+    		xlabel('time')
+    		a=polyfit(time,h,1);
+    		hold on
+    		plot (time,a(1)*time + a(2),'k-')
+    		nexttile
+    		plot(time,Diameter,'bo',time,exp(a(1)*time + a(2)),'k-')
+    		ylabel('Diameter')
+    		xlabel('time')
+    		title( sprintf('Diameter = %.2f x^{%.2f t}', a(2), a(1)) );
 	
 	% Alert user that we're done.
 	if writeToDisk
